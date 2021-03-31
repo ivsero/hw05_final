@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Новая запись{% endblock %}
+
+{% block header %}Форма записи{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 p-5">
+    <div class="card">
+      <div class="card-header">
+        {% if post %}
+          Редактировать запись
+        {% else %}
+          Добавить новую запись
+        {% endif %}
+        </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data" {% if post%}action="{% url 'post_edit' username=request.user.username post_id=post.id %}" {% else %}action="{% url 'new_post' %}"{% endif %}>
+          {% csrf_token %}
+          {{ form.as_p }}
+          <input type="submit" value="Отправить">
+        </form>
+      </div> <!-- card body -->
+    </div> <!-- card -->
+  </div> <!-- col -->
+</div> <!-- row -->
+
+{% endblock %}
