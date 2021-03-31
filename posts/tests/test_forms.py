@@ -1,12 +1,8 @@
-import shutil
-import tempfile
-
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 from posts.models import Post, Group
-from django.conf import settings
 
 
 USER = get_user_model()
@@ -30,11 +26,6 @@ class PostCreateFormTests(TestCase):
             group=cls.group,
             author=cls.user,
         )
-
-    # @classmethod
-    # def tearDownClass(cls):
-    #     shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
-    #     super().tearDownClass()
 
     def test_create_new_post(self):
         """Валидная форма создает новую запись в Post."""

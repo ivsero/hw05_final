@@ -206,8 +206,10 @@ class PostsPagesTests(TestCase):
             'author': self.user
         }
         self.authorized_client.post(
-            reverse(
-                'add_comment', kwargs={'username': self.user, 'post_id': post.id}
+            reverse('add_comment', kwargs={
+                    'username': self.user,
+                    'post_id': post.id
+            }
             ), data=form_fields, follow=True
         )
         response = self.authorized_client.get(reverse(
@@ -228,8 +230,10 @@ class PostsPagesTests(TestCase):
             'author': self.user
         }
         self.guest_client.post(
-            reverse(
-                'add_comment', kwargs={'username': self.user, 'post_id': post.id}
+            reverse('add_comment', kwargs={
+                'username': self.user,
+                'post_id': post.id
+            }
             ), data=form_fields, follow=True
         )
         response = self.guest_client.get(reverse(

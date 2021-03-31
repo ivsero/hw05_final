@@ -98,6 +98,7 @@ class Comment(models.Model):
     def __str__(self):
         return self.text[:10]
 
+
 class Follow(models.Model):
     """Follow model"""
 

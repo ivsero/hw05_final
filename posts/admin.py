@@ -25,6 +25,7 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ('pub_date',)
     empty_value_display = '-пусто-'
 
+
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     """Page of comments in the admin panel"""
