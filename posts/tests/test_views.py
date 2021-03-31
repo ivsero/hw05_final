@@ -210,11 +210,13 @@ class PostsPagesTests(TestCase):
                     'username': self.user,
                     'post_id': post.id
             }
-            ), data=form_fields, follow=True
-        )
-        response = self.authorized_client.get(reverse(
-            'post', kwargs={'username': self.user, 'post_id': post.id}
-        ), data=form_fields, follow=True)
+            ), data=form_fields, follow=True)
+        response = self.authorized_client.get(
+            reverse('post', kwargs={
+                'username': self.user,
+                'post_id': post.id
+            }
+            ), data=form_fields, follow=True)
 
         self.assertContains(response, 'тестовый комментарий')
 
