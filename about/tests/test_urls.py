@@ -1,26 +1,39 @@
+from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
+from posts.models import USER
+
+USER = get_user_model()
 
 
 class StaticURLTests(TestCase):
-    def setUp(self):
-        self.guest_client = Client()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = USER.objects.create_user(username='TestUser')
+        cls.guest_client = Client()
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user)
 
-    def test_about_url_exists_at_desired_location(self):
-        """Проверка доступности адреса /about/author/."""
-        response = self.guest_client.get('/about/author/')
-        self.assertEqual(response.status_code, 200)
+    def test_urls_uses_correct_templates(self):
+        """URL доступны для всех пользователей"""
+        urls_list = (
+            '/about/author/',
+            '/about/tech/',
+        )
 
-    def test_about_url_uses_correct_template(self):
-        """Проверка шаблона для адреса /page/about/."""
-        response = self.guest_client.get('/about/author/')
-        self.assertTemplateUsed(response, 'about/author.html')
+        for path in urls_list:
+            with self.subTest(path):
+                response = self.guest_client.get(path)
+                self.assertEqual(response.status_code, 200)
 
-    def test_tech_url_exists_at_desired_location(self):
-        """Проверка доступности адреса /about/tech/."""
-        response = self.guest_client.get('/about/tech/')
-        self.assertEqual(response.status_code, 200)
+    def test_urls_uses_correct_templates(self):
+        """URL используют корректный шаблон"""
+        templates_url_names = {
+            'about/author.html': '/about/author/',
+            'about/tech.html': '/about/tech/',
+        }
 
-    def test_tech_url_uses_correct_template(self):
-        """Проверка шаблона для адреса /page/about/."""
-        response = self.guest_client.get('/about/tech/')
-        self.assertTemplateUsed(response, 'about/tech.html')
+        for template, reverse_name in templates_url_names.items():
+            with self.subTest():
+                response = self.authorized_client.get(reverse_name)
+                self.assertTemplateUsed(response, template)

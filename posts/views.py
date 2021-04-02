@@ -4,6 +4,7 @@ from .forms import PostForm, CommentForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
+from django.http import HttpResponseForbidden, HttpResponseNotAllowed
 
 USER = get_user_model()
 
@@ -56,7 +57,7 @@ def profile(request, username):
     user_profile = get_object_or_404(USER, username=username)
     post_list = Post.objects.filter(
         author=user_profile
-    ).order_by('-pub_date').all()
+    ).order_by('-pub_date')
     posts_count = post_list.count()
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
@@ -64,7 +65,7 @@ def profile(request, username):
     followers = Follow.objects.filter(author=user_profile.id).count()
     follows = Follow.objects.filter(user=user_profile.id).count()
     following = Follow.objects.filter(
-        user=request.user.id, author=user_profile.id).all()
+        user=request.user.id, author=user_profile.id).exists()
 
     return render(request, 'profile.html', {
         'user_profile': user_profile,
@@ -88,13 +89,20 @@ def post_view(request, username, post_id):
     form = CommentForm()
     comment_list = Comment.objects.filter(
         post=post
-    ).order_by('-created').all()
+    ).order_by('-created')
+    followers = Follow.objects.filter(author=user_profile.id).count()
+    follows = Follow.objects.filter(user=user_profile.id).count()
+    following = Follow.objects.filter(
+        user=request.user.id, author=user_profile.id).all()
     return render(request, 'post.html', {
         'user_profile': user_profile,
         'post': post,
         'posts_count': posts_count,
         'comment_list': comment_list,
-        'form': form
+        'form': form,
+        'followers': followers,
+        'follows': follows,
+        'following': following
     })
 
 
@@ -151,12 +159,7 @@ def add_comment(request, username, post_id):
             'post': post,
             'form': form
         })
-    form = CommentForm()
-    return redirect(
-        'post',
-        username=post.author.username,
-        post_id=post_id
-    )
+    return HttpResponseNotAllowed(('POST'))
 
 
 @login_required
@@ -164,10 +167,8 @@ def follow_index(request):
     following = Follow.objects.filter(user=request.user).all()
     author_list = []
     for author in following:
-        author_list.append(author.author.id)
-    post_list = Post.objects.filter(
-        author__in=author_list
-    ).order_by('-pub_date').all()
+        author_list.append(author.author_id)
+    post_list = Post.objects.filter(author__following__user=request.user).all()
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -184,14 +185,17 @@ def profile_follow(request, username):
     check_follow = Follow.objects.filter(
         user=user.id,
         author=user_profile.id
-    ).count()
+    ).exists()
 
-    if check_follow == 0 and user_profile.id != user.id:
-        Follow.objects.create(user=request.user, author=user_profile)
+    if check_follow == False and user_profile.id != user.id:
+        Follow.objects.get_or_create(user=request.user, author=user_profile)
+    else:
+        return HttpResponseForbidden()
     return redirect(
         'profile',
         username=username
     )
+
 
 
 @login_required
@@ -202,12 +206,10 @@ def profile_unfollow(request, username):
         user=user.id,
         author=user_profile.id
     ).count()
-
-    if check_follow == 1 and user_profile.id != user.id:
-        Follow.objects.filter(
-            user=request.user,
-            author=user_profile
-        ).delete()
+    Follow.objects.filter(
+        user=request.user,
+        author=user_profile
+    ).delete()
     return redirect(
         'profile',
         username=username

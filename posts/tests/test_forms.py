@@ -68,9 +68,12 @@ class PostEditFormTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = USER.objects.create_user(username='TestUser')
+        cls.user2 = USER.objects.create_user(username='TestUser2')
         cls.guest_client = Client()
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
+        cls.authorized_client2 = Client()
+        cls.authorized_client2.force_login(cls.user2)
         cls.group = Group.objects.create(
             title='Название группы',
             slug='test',
@@ -121,3 +124,29 @@ class PostEditFormTests(TestCase):
         )
         edited_post = Post.objects.get(id__exact=post.id)
         self.assertNotEqual(edited_post.text, 'Новый пост')
+
+    def test_edit_post_for_user(self):
+        """Проверка отображения отредактированного
+        поста для пользователя"""
+
+        post = Post.objects.create(
+            text='Старый текст',
+            group=self.group,
+            author=self.user,
+        )
+
+        posts_count = Post.objects.count()
+
+        form_fields = {
+            'text': 'Новый пост',
+            'author': self.user
+        }
+        self.authorized_client2.post(
+            reverse(
+                'post_edit', kwargs={'username': self.user, 'post_id': post.id}
+            ), data=form_fields, follow=True
+        )
+        edited_post = Post.objects.get(id__exact=post.id)
+
+        self.assertNotEqual(edited_post.text, 'Новый пост')
+        self.assertEqual(Post.objects.count(), posts_count)

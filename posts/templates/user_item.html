@@ -34,7 +34,7 @@
                         href="{% url 'profile_unfollow' user_profile.username %}" role="button"> 
                         Отписаться 
                 </a> 
-                {% else %}
+                {% elif user_profile.username != user.username%}
                 <a class="btn btn-lg btn-primary" 
                         href="{% url 'profile_follow' user_profile.username %}" role="button">
                 Подписаться 
