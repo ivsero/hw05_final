@@ -187,7 +187,7 @@ def profile_follow(request, username):
         author=user_profile.id
     ).exists()
 
-    if check_follow == False and user_profile.id != user.id:
+    if check_follow is False and user_profile.id != user.id:
         Follow.objects.get_or_create(user=request.user, author=user_profile)
     else:
         return HttpResponseForbidden()
@@ -197,15 +197,10 @@ def profile_follow(request, username):
     )
 
 
-
 @login_required
 def profile_unfollow(request, username):
     user = request.user
     user_profile = get_object_or_404(USER, username=username)
-    check_follow = Follow.objects.filter(
-        user=user.id,
-        author=user_profile.id
-    ).count()
     Follow.objects.filter(
         user=request.user,
         author=user_profile
