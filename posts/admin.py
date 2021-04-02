@@ -53,4 +53,4 @@ class FollowAdmin(admin.ModelAdmin):
         'user',
     )
 
-    search_fields = ('author', 'user')
+    search_fields = ('author__username', 'user__username',)

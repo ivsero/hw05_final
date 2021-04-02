@@ -34,6 +34,6 @@ class StaticURLTests(TestCase):
         }
 
         for template, reverse_name in templates_url_names.items():
-            with self.subTest():
+            with self.subTest(reverse_name):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)

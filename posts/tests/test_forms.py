@@ -93,7 +93,6 @@ class PostEditFormTests(TestCase):
 
         form_fields = {
             'text': 'Новый пост',
-            'author': self.user
         }
         self.authorized_client.post(
             reverse(
@@ -146,7 +145,7 @@ class PostEditFormTests(TestCase):
                 'post_edit', kwargs={'username': self.user, 'post_id': post.id}
             ), data=form_fields, follow=True
         )
-        edited_post = Post.objects.get(id__exact=post.id)
+        edited_post = Post.objects.get(id=post.id)
 
         self.assertNotEqual(edited_post.text, 'Новый пост')
         self.assertEqual(Post.objects.count(), posts_count)

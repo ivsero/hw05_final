@@ -159,15 +159,12 @@ def add_comment(request, username, post_id):
             'post': post,
             'form': form
         })
-    return HttpResponseNotAllowed(('POST'))
+    return HttpResponseNotAllowed('Error 405: Method Not Allowed')
 
 
 @login_required
 def follow_index(request):
     following = Follow.objects.filter(user=request.user).all()
-    author_list = []
-    for author in following:
-        author_list.append(author.author_id)
     post_list = Post.objects.filter(author__following__user=request.user).all()
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
@@ -187,7 +184,7 @@ def profile_follow(request, username):
         author=user_profile.id
     ).exists()
 
-    if check_follow is False and user_profile.id != user.id:
+    if user_profile.id != user.id:
         Follow.objects.get_or_create(user=request.user, author=user_profile)
     else:
         return HttpResponseForbidden()
