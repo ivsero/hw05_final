@@ -164,7 +164,6 @@ def add_comment(request, username, post_id):
 
 @login_required
 def follow_index(request):
-    following = Follow.objects.filter(user=request.user).all()
     post_list = Post.objects.filter(author__following__user=request.user).all()
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
@@ -179,10 +178,6 @@ def follow_index(request):
 def profile_follow(request, username):
     user = request.user
     user_profile = get_object_or_404(USER, username=username)
-    check_follow = Follow.objects.filter(
-        user=user.id,
-        author=user_profile.id
-    ).exists()
 
     if user_profile.id != user.id:
         Follow.objects.get_or_create(user=request.user, author=user_profile)
