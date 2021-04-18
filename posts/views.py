@@ -42,7 +42,10 @@ def new_post(request):
 
     form = PostForm()
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        form = PostForm(
+            request.POST,
+            files=request.FILES or None,
+        )
         if form.is_valid():
             new_post = form.save(commit=False)
             new_post.author = request.user
